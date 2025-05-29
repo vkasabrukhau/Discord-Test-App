@@ -58,6 +58,46 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       });
     }
 
+    if(name === 'challenge' && id){
+      const context = req.body.context; //obtain the contenxt from the request sent by the user ~ discord convo to the discord bot host server
+      const userId = context === 0 ? req.body.member.user.id : req.body.user.id; //parses request to get the user id 
+      const objectName = req.body.data.options[0].value; //I THINK that this just gets the first thing in the options list withi the context returned in the request. Not sure how I would intuitively know how to do this
+
+      //new object added to the activeGames list, added under the ealrier declared ID, object contains id and the chosen option from above?
+      activeGames[id] = {
+        id: userId,
+        objectName,
+      }
+
+      // Sends back
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, //Potential array of things for the 
+        data: {
+          flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+          components: [
+              {
+                type: MessageComponentTypes.TEXT_DISPLAY,
+                content: `Rock papers scissors challenge from <@${userId}>`,
+              },
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: [
+                  {
+                    type: MessageComponentTypes.BUTTON,
+                    // Append the game ID to use later on
+                    custom_id: `accept_button_${req.body.id}`,
+                    label: 'Accept',
+                    style: ButtonStyleTypes.PRIMARY,
+                  },
+                ],
+              }
+            ]
+        }
+      })
+    }
+
+    if(n)
+
     console.error(`unknown command: ${name}`);
     return res.status(400).json({ error: 'unknown command' });
   }
